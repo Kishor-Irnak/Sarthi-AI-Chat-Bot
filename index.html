@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sarthi - AI Assistant</title>
+    <!-- Load Flowbite CSS -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Load Lucide icons (standalone) -->
+    <!-- This version does not require React -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+            },
+            colors: {
+              "brand-dark": "#0D1117",
+              "brand-dark-2": "#161B22",
+              "brand-dark-3": "#21262D",
+              "brand-accent": "#2F81F7",
+              "brand-cyan": "#39D3BB",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      /* Add a cool, animated gradient background for the glass effect to pop */
+      body {
+        background: linear-gradient(
+          -45deg,
+          #0d1117,
+          #161b22,
+          #0d1117,
+          #2f81f7,
+          #39d3bb
+        );
+        background-size: 400% 400%;
+        animation: gradientBG 15s ease infinite;
+      }
+
+      @keyframes gradientBG {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent; /* Make track transparent for glass effect */
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #21262d;
+        border-radius: 3px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #30363d;
+      }
+      .chat-bubble-ai {
+        animation: fadeIn 0.3s ease-out;
+      }
+      .chat-bubble-user {
+        animation: fadeIn 0.3s ease-out;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="text-gray-200 font-sans min-h-screen flex items-center justify-center p-0 md:p-4"
+  >
+    <!-- Main App Container - Now with Glass Morphism -->
+    <div
+      class="flex flex-col w-full max-w-lg h-screen md:h-[90vh] md:max-h-[800px] bg-brand-dark-2/70 backdrop-blur-xl md:rounded-2xl border border-gray-100/10 shadow-2xl overflow-hidden"
+    >
+      <!-- Header - Now part of the glass effect -->
+      <header
+        class="flex items-center justify-between p-4 border-b border-gray-100/10 sticky top-0 bg-brand-dark-2/50 backdrop-blur-sm z-10 flex-shrink-0"
+      >
+        <button class="p-2 rounded-full hover:bg-white/10">
+          <!-- Use <i> tag with data-lucide for icons -->
+          <i data-lucide="chevron-left" class="w-5 h-5"></i>
+        </button>
+        <h1 class="text-lg font-semibold">Sarthi</h1>
+        <button class="p-2 rounded-full hover:bg-white/10">
+          <i data-lucide="more-horizontal" class="w-5 h-5"></i>
+        </button>
+      </header>
+
+      <!-- Chat History -->
+      <main id="chat-history" class="flex-grow p-4 space-y-6 overflow-y-auto">
+        <!-- Initial AI message -->
+        <div class="chat-bubble-ai self-start">
+          <div class="flex items-start gap-3">
+            <div
+              class="p-2 bg-gradient-to-br from-brand-cyan to-blue-500 rounded-full w-8 h-8 flex-shrink-0 flex items-center justify-center"
+            >
+              <i data-lucide="sparkles" class="w-4 h-4 text-white"></i>
+            </div>
+            <div
+              class="bg-brand-dark-3 rounded-lg rounded-tl-none p-4 max-w-xs"
+            >
+              <p>How can I assist you today?</p>
+              <!-- Quick actions -->
+              <div
+                class="flex items-center gap-4 mt-3 pt-3 border-t border-brand-dark-3/50"
+              >
+                <button
+                  class="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition-colors"
+                  onclick="copyToClipboard(this)"
+                >
+                  <i data-lucide="copy" class="w-3 h-3"></i>
+                  Copy
+                </button>
+                <button
+                  class="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition-colors"
+                  onclick="shareText(this)"
+                >
+                  <i data-lucide="share-2" class="w-3 h-3"></i>
+                  Share
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Message Input - Also with glass effect -->
+      <footer
+        class="p-4 border-t border-gray-100/10 sticky bottom-0 bg-brand-dark-2/50 backdrop-blur-sm z-10 flex-shrink-0"
+      >
+        <div
+          class="flex items-center bg-gray-100/10 backdrop-blur-sm rounded-full px-2 py-1"
+        >
+          <input
+            type="text"
+            id="message-input"
+            class="flex-grow bg-transparent px-4 py-3 text-sm focus:outline-none focus:ring-0 focus:outline-none placeholder-gray-400"
+            placeholder="Type a message..."
+          />
+          <button class="p-2 rounded-full hover:bg-white/10">
+            <i data-lucide="mic" class="w-5 h-5 text-gray-400"></i>
+          </button>
+          <button
+            id="send-button"
+            class="p-3 bg-gradient-to-br from-brand-cyan to-blue-500 rounded-full ml-2 hover:opacity-90 transition-opacity"
+          >
+            <i data-lucide="send" class="w-5 h-5 text-white"></i>
+          </button>
+        </div>
+      </footer>
+
+      <!-- Flowbite Toast Notification -->
+      <div
+        id="toast"
+        class="fixed bottom-5 left-1/2 -translate-x-1/2 flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800 transition-opacity duration-300 opacity-0 hidden"
+        role="alert"
+        data-transition-show="opacity-100"
+        data-transition-hide="opacity-0"
+      >
+        <div
+          id="toast-icon"
+          class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200"
+        >
+          <svg
+            class="w-5 h-5"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"
+            />
+          </svg>
+        </div>
+        <div id="toast-message" class="ms-3 text-sm font-normal">
+          Copied to clipboard!
+        </div>
+        <button
+          type="button"
+          class="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700"
+          onclick="hideToast()"
+        >
+          <span class="sr-only">Close</span>
+          <svg
+            class="w-3 h-3"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 14 14"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Load Flowbite JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+
+    <script>
+      // --- DOM Elements ---
+      const chatHistory = document.getElementById("chat-history");
+      const messageInput = document.getElementById("message-input");
+      const sendButton = document.getElementById("send-button");
+      const toast = document.getElementById("toast");
+      const toastMessage = document.getElementById("toast-message");
+      const toastIcon = document.getElementById("toast-icon");
+
+      // --- Icon Setup ---
+      // This needs to run after the DOM is loaded
+      document.addEventListener("DOMContentLoaded", () => {
+        // Check if lucide is available
+        if (typeof lucide === "undefined") {
+          console.error("Lucide icons failed to load.");
+          return;
+        }
+        // Create all icons on the page
+        lucide.createIcons();
+      });
+
+      // --- Gemini API ---
+      const apiKey = ""; // Will be auto-provided by the environment
+      const modelApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+      // --- Chat State ---
+      let conversationHistory = [];
+      const systemInstruction = {
+        role: "model",
+        parts: [
+          {
+            text: "You are Sarthi, a helpful and friendly AI assistant. Keep your responses concise and informative, like in a mobile chat app.",
+          },
+        ],
+      };
+
+      // --- Event Listeners ---
+      sendButton.addEventListener("click", sendMessage);
+      messageInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          sendMessage();
+        }
+      });
+
+      /**
+       * Sends the user's message to the chat and fetches a response.
+       */
+      async function sendMessage() {
+        const message = messageInput.value.trim();
+        if (!message) return;
+
+        // Add user message to UI
+        addMessageToUI("user", message);
+        // Add user message to history
+        conversationHistory.push({ role: "user", parts: [{ text: message }] });
+
+        messageInput.value = "";
+        showLoadingIndicator();
+
+        try {
+          const aiResponse = await fetchWithBackoff(modelApiUrl, {
+            contents: [systemInstruction, ...conversationHistory],
+            generationConfig: {
+              temperature: 0.7,
+              topK: 1,
+              topP: 1,
+              maxOutputTokens: 2048,
+            },
+          });
+
+          hideLoadingIndicator();
+          addMessageToUI("ai", aiResponse);
+          // Add AI response to history
+          conversationHistory.push({
+            role: "model",
+            parts: [{ text: aiResponse }],
+          });
+
+          // Add quick replies based on context (static for this demo)
+          addQuickReplies();
+        } catch (error) {
+          console.error("Error fetching Gemini response:", error);
+          hideLoadingIndicator();
+          addMessageToUI(
+            "ai",
+            "Sorry, I'm having trouble connecting. Please try again.",
+            true
+          );
+        }
+      }
+
+      /**
+       * Adds a message bubble to the chat history UI.
+       */
+      function addMessageToUI(sender, message, isError = false) {
+        const messageElement = document.createElement("div");
+
+        if (sender === "user") {
+          messageElement.className = "chat-bubble-user self-end";
+          messageElement.innerHTML = `
+                    <div class="bg-brand-accent text-white rounded-lg rounded-br-none p-4 max-w-xs">
+                        <p>${message}</p>
+                    </div>
+                `;
+        } else {
+          // AI
+          messageElement.className = "chat-bubble-ai self-start";
+          messageElement.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <div class="p-2 bg-gradient-to-br from-brand-cyan to-blue-500 rounded-full w-8 h-8 flex-shrink-0 flex items-center justify-center">
+                            <i data-lucide="sparkles" class="w-4 h-4 text-white"></i>
+                        </div>
+                        <div class="${
+                          isError ? "bg-red-500" : "bg-brand-dark-3"
+                        } rounded-lg rounded-tl-none p-4 max-w-xs">
+                            <p>${message}</p>
+                            ${
+                              !isError
+                                ? `
+                            <div class="flex items-center gap-4 mt-3 pt-3 border-t border-brand-dark-3/50">
+                                <button class="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition-colors" onclick="copyToClipboard(this)">
+                                    <i data-lucide="copy" class="w-3 h-3"></i> Copy
+                                </button>
+                                <button class="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition-colors" onclick="shareText(this)">
+                                    <i data-lucide="share-2" class="w-3 h-3"></i> Share
+                                </button>
+                            </div>
+                            `
+                                : ""
+                            }
+                        </div>
+                    </div>
+                `;
+        }
+
+        chatHistory.appendChild(messageElement);
+
+        // Render icons in new messages
+        if (typeof lucide !== "undefined") {
+          lucide.createIcons();
+        }
+
+        // Scroll to the bottom
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+      }
+
+      /**
+       * Adds a "Quick reply suggestions" block.
+       */
+      function addQuickReplies() {
+        const quickReplyId = `qr-${Date.now()}`;
+        // Prevent duplicate quick reply blocks
+        if (document.querySelector(`[id^="qr-"]`)) return; // Check existing blocks
+
+        const replies = [
+          "Loft Beats",
+          "Nature & Ambient Sounds",
+          "Motivational & Classical",
+        ];
+
+        const replyElement = document.createElement("div");
+        replyElement.id = quickReplyId;
+        replyElement.className = "chat-bubble-ai self-start";
+        replyElement.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="w-8 h-8 flex-shrink-0"></div> <!-- Spacer -->
+                    <div class="bg-brand-dark-3 rounded-lg p-4 max-w-xs w-full">
+                        <p class="text-sm font-medium mb-3">Quick reply suggestions</p>
+                        <div class="space-y-2">
+                            ${replies
+                              .map(
+                                (reply) => `
+                                <button class="w-full text-left text-sm text-gray-300 hover:text-white" onclick="sendQuickReply('${reply}')">
+                                    - ${reply}
+                                </button>
+                            `
+                              )
+                              .join("")}
+                        </div>
+                    </div>
+                </div>
+            `;
+        chatHistory.appendChild(replyElement);
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+      }
+
+      /**
+       * Sends a quick reply.
+       */
+      function sendQuickReply(text) {
+        messageInput.value = text;
+        sendMessage();
+        // Remove the quick reply block after use
+        const qrBlocks = chatHistory.querySelectorAll('[id^="qr-"]');
+        qrBlocks.forEach((block) => block.remove());
+      }
+
+      /**
+       * Shows a "typing..." indicator.
+       */
+      function showLoadingIndicator() {
+        const loadingElement = document.createElement("div");
+        loadingElement.id = "loading-indicator";
+        loadingElement.className = "chat-bubble-ai self-start";
+        loadingElement.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="p-2 bg-gradient-to-br from-brand-cyan to-blue-500 rounded-full w-8 h-8 flex-shrink-0 flex items-center justify-center">
+                        <i data-lucide="sparkles" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <div class="bg-brand-dark-3 rounded-lg rounded-tl-none p-4 max-w-xs">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0s;"></div>
+                            <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.2s;"></div>
+                            <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.4s;"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        chatHistory.appendChild(loadingElement);
+        if (typeof lucide !== "undefined") {
+          lucide.createIcons();
+        }
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+      }
+
+      /**
+       * Hides the loading indicator.
+       */
+      function hideLoadingIndicator() {
+        const loadingElement = document.getElementById("loading-indicator");
+        if (loadingElement) {
+          loadingElement.remove();
+        }
+      }
+
+      /**
+       * Fetches data from the Gemini API with exponential backoff.
+       */
+      async function fetchWithBackoff(url, payload, retries = 5, delay = 1000) {
+        for (let i = 0; i < retries; i++) {
+          try {
+            const response = await fetch(url, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (
+              result.candidates &&
+              result.candidates[0].content.parts[0].text
+            ) {
+              return result.candidates[0].content.parts[0].text;
+            } else {
+              throw new Error("Invalid API response structure.");
+            }
+          } catch (error) {
+            console.warn(`Attempt ${i + 1} failed. Retrying in ${delay}ms...`);
+            await new Promise((resolve) => setTimeout(resolve, delay));
+            delay *= 2; // Exponential backoff
+          }
+        }
+        throw new Error("Max retries reached. Could not fetch API response.");
+      }
+
+      // --- Utility Functions ---
+
+      /**
+       * Copies text from the parent message bubble to the clipboard.
+       */
+      window.copyToClipboard = (buttonElement) => {
+        const textToCopy = buttonElement
+          .closest(".bg-brand-dark-3")
+          .querySelector("p").textContent;
+
+        // Use execCommand as a fallback for iframe environments
+        const textArea = document.createElement("textarea");
+        textArea.value = textToCopy;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand("copy");
+          showToast("Copied to clipboard!");
+        } catch (err) {
+          console.error("Failed to copy text: ", err);
+          showToast("Failed to copy.", true);
+        }
+        document.body.removeChild(textArea);
+      };
+
+      /**
+       * Shares text from the parent message bubble.
+       */
+      window.shareText = (buttonElement) => {
+        const textToShare = buttonElement
+          .closest(".bg-brand-dark-3")
+          .querySelector("p").textContent;
+
+        if (navigator.share) {
+          navigator
+            .share({
+              title: "Sarthi Response",
+              text: textToShare,
+            })
+            .catch((err) => console.error("Share failed:", err));
+        } else {
+          showToast("Share not supported in this browser.", true);
+        }
+      };
+
+      /**
+       * Shows a toast notification.
+       */
+      function showToast(message, isError = false) {
+        toastMessage.textContent = message;
+
+        // Configure icon and color for error or success
+        if (isError) {
+          toastIcon.innerHTML = `
+                    <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z"/>
+                    </svg>
+                `;
+          toastIcon.className =
+            "inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-red-500 bg-red-100 rounded-lg dark:bg-red-800 dark:text-red-200";
+        } else {
+          toastIcon.innerHTML = `
+                    <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
+                    </svg>
+                `;
+          toastIcon.className =
+            "inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200";
+        }
+
+        // Show toast
+        toast.classList.remove("hidden", "opacity-0");
+
+        // Hide toast after 3 seconds
+        setTimeout(() => {
+          hideToast();
+        }, 3000);
+      }
+
+      /**
+       * Hides the toast notification.
+       */
+      window.hideToast = () => {
+        toast.classList.add("opacity-0");
+        // Wait for transition to finish before hiding
+        setTimeout(() => {
+          toast.classList.add("hidden");
+        }, 300); // Must match transition duration
+      };
+    </script>
+  </body>
+</html>
