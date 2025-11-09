@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sarthi - AI Assistant</title>
+
+    <!-- Added Favicon -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2339D3BB'><path d='M10 0 L13 7 L20 10 L13 13 L10 20 L7 13 L0 10 L7 7 Z' /></svg>"
+    />
+
     <!-- Load Flowbite CSS -->
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css"
@@ -157,21 +164,30 @@
       <footer
         class="p-4 border-t border-gray-100/10 sticky bottom-0 bg-brand-dark-2/50 backdrop-blur-sm z-10 flex-shrink-0"
       >
-        <div
-          class="flex items-center bg-gray-100/10 backdrop-blur-sm rounded-full px-2 py-1"
-        >
-          <input
-            type="text"
-            id="message-input"
-            class="flex-grow bg-transparent px-4 py-3 text-sm focus:outline-none focus:ring-0 focus:outline-none placeholder-gray-400"
-            placeholder="Type a message..."
-          />
-          <button class="p-2 rounded-full hover:bg-white/10">
-            <i data-lucide="mic" class="w-5 h-5 text-gray-400"></i>
-          </button>
+        <!-- Updated structure: input pill and send button are separate -->
+        <div class="flex items-center gap-3">
+          <!-- Input pill -->
+          <div
+            class="flex-grow flex items-center bg-gray-100/10 backdrop-blur-sm rounded-full px-4 py-1"
+          >
+            <!-- Added focus:ring-0 to remove the blue outline on click -->
+            <input
+              type="text"
+              id="message-input"
+              class="flex-grow bg-transparent py-2 text-sm focus:outline-none focus:ring-0 placeholder-gray-400"
+              placeholder="Type a message..."
+            />
+            <button class="p-2 rounded-full hover:bg-white/10 ml-1">
+              <i data-lucide="paperclip" class="w-5 h-5 text-gray-400"></i>
+            </button>
+            <button class="p-2 rounded-full hover:bg-white/10 ml-1">
+              <i data-lucide="mic" class="w-5 h-5 text-gray-400"></i>
+            </button>
+          </div>
+          <!-- Send Button -->
           <button
             id="send-button"
-            class="p-3 bg-gradient-to-br from-brand-cyan to-blue-500 rounded-full ml-2 hover:opacity-90 transition-opacity"
+            class="p-3 bg-gradient-to-br from-brand-cyan to-blue-500 rounded-full hover:opacity-90 transition-opacity flex-shrink-0"
           >
             <i data-lucide="send" class="w-5 h-5 text-white"></i>
           </button>
